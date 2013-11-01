@@ -1,0 +1,30 @@
+{
+  "Id": "store image files through javascript client",
+  "Statement":[
+    {
+      "Sid":"Allow get requests originated from dev.yathit.com",
+      "Effect":"Allow",
+      "Principal":"*",
+      "Action":"s3:GetObject",
+      "Resource":"arn:aws:s3:::ydn-db-sample-image-store-s3/*",
+      "Condition":{
+        "StringLike":{
+          "aws:Referer":[
+            "http://dev.yathit.com/*",
+            "http://yathit.github.com/*"
+          ]
+        }
+      }
+    }, {
+      "Sid": "Allow Facebook federated login",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::YOUR_BUCKET_NAME/facebook-${graph.facebook.com:id}/*"
+      ],
+      "Effect": "Allow"
+    }
+  ]
+}

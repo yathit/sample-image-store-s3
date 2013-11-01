@@ -1,0 +1,17 @@
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["http://dev.yathit.com", "http://yathit.github.com", "http://localhost:8085"],
+      "AllowedHeaders": ["*"],
+      "AllowedMethods": ["PUT", "POST", "DELETE", "GET", "HEAD"],
+      "MaxAgeSeconds": 3000,
+      "ExposeHeaders": ["x-amz-server-side-encryption"]
+    },
+    {
+      "AllowedOrigins": ["*"],
+      "AllowedHeaders": ["Authorization"],
+      "AllowedMethods": ["GET"],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}
