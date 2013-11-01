@@ -19,12 +19,13 @@
  */
 
 
-var appId = '225178760975988';
-var roleArn = 's3-web-user';
-var bucketName = 'ydn-db-sample-image-store-s3'
-var fbUserId;
+var awsAccountId = '4598-8044-1775';
+var roleArn = 'test-gapi';
+var bucketName = 'ydn-db-sample-image-store-s3';
 
-var bucket = new AWS.S3({params: {Bucket: bucketName}});
+
+AWS.config.region = 'ap-southeast-1';
+
 
 var fileChooser = document.getElementById('file-chooser');
 var button = document.getElementById('upload-button');
@@ -32,13 +33,16 @@ var results = document.getElementById('results');
 button.addEventListener('click', function() {
   var file = fileChooser.files[0];
   if (file) {
-    results.innerHTML = '';
-
+    var user_id = 'id'; // document.getElementById('user-name').getAttribute('value');
+    var objKey = user_id + '/' + file.name;
+    results.innerHTML = 'uploadint to ' + objKey;
     //Object key will be facebook-USERID#/FILE_NAME
-    var objKey = 'facebook-' + fbUserId + '/' + file.name;
+
+    var bucket = new AWS.S3({params: {Bucket: bucketName, region: 'ap-southeast-1'}});
     var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
     bucket.putObject(params, function (err, data) {
       if (err) {
+        console.log(err);
         results.innerHTML = 'ERROR: ' + err;
       } else {
         var imageTag = "<img src='" + "https://s3.amazonaws.com/" +
@@ -51,29 +55,13 @@ button.addEventListener('click', function() {
   }
 }, false);
 
-/*!
- * Login to your application using Facebook.
- * Uses the Facebook SDK for JavaScript available here:
- * https://developers.facebook.com/docs/javascript/gettingstarted/
- */
-window.fbAsyncInit = function() {
-  FB.init({ appId: appId });
-  FB.login(function(response) {
-    bucket.config.credentials = new AWS.WebIdentityCredentials({
-      ProviderId: 'graph.facebook.com',
-      RoleArn: roleArn,
-      WebIdentityToken: response.authResponse.accessToken
-    });
-    fbUserId = response.authResponse.userID;
-    button.style.display = 'block';
-  });
-};
 
-// Load the Facebook SDK asynchronously
-(function(d, s, id){
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) {return;}
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js";
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
+function runUploadApp(token) {
+  console.log(token);
+  AWS.config.credentials = new AWS.WebIdentityCredentials({
+    RoleArn: 'arn:aws:iam::459880441775:role/' + roleArn,
+    WebIdentityToken: token.id_token
+  });
+  button.style.display = '';
+}
+

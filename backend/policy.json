@@ -17,12 +17,24 @@
       }
     }, {
       "Sid": "Allow Facebook federated login",
+      "Principal":"*",
       "Action": [
         "s3:PutObject",
         "s3:PutObjectAcl"
       ],
       "Resource": [
-        "arn:aws:s3:::YOUR_BUCKET_NAME/facebook-${graph.facebook.com:id}/*"
+        "arn:aws:s3:::ydn-db-sample-image-store-s3/facebook-${graph.facebook.com:id}/*"
+      ],
+      "Effect": "Allow"
+    }, {
+      "Sid": "Allow Google federated login",
+      "Principal":"*",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ydn-db-sample-image-store-s3/*"
       ],
       "Effect": "Allow"
     }
