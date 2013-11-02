@@ -58,6 +58,9 @@ button.addEventListener('click', function() {
 
 function runUploadApp(token) {
   console.log(token);
+  if (!token) {
+    return;
+  }
   AWS.config.credentials = new AWS.WebIdentityCredentials({
     RoleArn: 'arn:aws:iam::' + awsAccountId + ':role/' + roleArn,
     WebIdentityToken: token.id_token
