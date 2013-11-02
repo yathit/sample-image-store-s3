@@ -30,10 +30,11 @@
     if (authResult && !authResult.error) {
       login_link.textContent = 'logout';
       login_link.onclick = function() {
-        gapi.auth.signOut();
+        console.log('logging out');
+        gapi.auth.signOut(); // doesn't work on gapi client.
       };
-      login_link.style.display = 'none';
       login_link.href = '#logout';
+      login_link.style.display = 'none';
       makeApiCall(authResult);
     } else {
       login_link.style.display = '';
