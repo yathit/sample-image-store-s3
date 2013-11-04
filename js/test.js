@@ -68,7 +68,7 @@ btn_list.onclick = function(e) {
         },
         {
           tag: 'ul',
-          class: 'listing',
+          'class': 'listing',
           children: function() {
             return (json2html.transform(this.Contents, transform.content))
           }
