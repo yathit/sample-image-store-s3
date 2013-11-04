@@ -1,10 +1,11 @@
 (function(id_login_link, id_name, runApp) {
 
+  // Edit the following three constants as necessary.
   var clientId = '968361937576-hka195tuontd5vmeuhuntv15lgcpn08v.apps.googleusercontent.com';
-
   var apiKey = 'AIzaSyCJiBR1-tmt0Pp2yhBo8P7g6FqY2q_S7F8';
-
   var scopes = ['email'];
+
+  var nonce = Math.random().toFixed(6).substr(2);
 
   window.handleClientLoad = function() {
     gapi.client.setApiKey(apiKey);
@@ -13,14 +14,14 @@
 
   function checkAuth() {
     gapi.auth.authorize(
-        {response_type: 'token id_token', client_id: clientId, scope: scopes, immediate: true},
+        {response_type: 'token id_token', client_id: clientId, scope: scopes, immediate: true, state: nonce},
         handleAuthResult);
   }
 
   function handleAuthClick(event) {
     // Step 3: get authorization to use private data
     gapi.auth.authorize(
-        {response_type: 'token id_token', client_id: clientId, scope: scopes, immediate: false},
+        {response_type: 'token id_token', client_id: clientId, scope: scopes, immediate: false, state: nonce},
         handleAuthResult);
     return false;
   }
@@ -28,6 +29,12 @@
   function handleAuthResult(authResult) {
     var login_link = document.getElementById(id_login_link);
     if (authResult && !authResult.error) {
+      if (authResult.state != nonce) {
+        throw Error('Invalid state ' + nonce + ' vs ' + authResult.state);
+      }
+      if (authResult.client_id != clientId) {
+        throw Error('Invalid audience ' + clientId + ' vs ' + authResult.client_id);
+      }
       login_link.textContent = 'logout';
       login_link.onclick = function() {
         console.log('logging out');
@@ -50,7 +57,6 @@
     gapi.client.request({
       'path': 'oauth2/v3/userinfo',
       'callback': function(data) {
-        console.log(data);
         var ele_name = document.getElementById(id_name);
         ele_name.textContent = data['email']; // .replace(/@.+/, '');
         ele_name.setAttribute('value', data['sub']);

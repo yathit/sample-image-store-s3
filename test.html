@@ -2,16 +2,23 @@
 <html>
 <head>
     <title>AWS SDK for JavaScript - Test</title>
+    <link href="css/app.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="lib/json2html.js"></script>
+    <script type="text/javascript" src="lib/jquery.json2html.js"></script>
 </head>
 <body>
-<div>
-
-  <a id="google-login">login</a>
-  <span id="user-name" style="display: none;"></span>
-
+<div id="login-toolbar">
+    <a id="google-login">login</a>
+    <span id="user-name" style="display: none;"></span>
 </div>
-<input type="file" id="file-chooser" />
-<button id="upload-button" style="display: none">Upload to S3</button>
+<div id="s3-toolbar"  style="display: none">
+    <button id="list">List</button>
+    <input type="file" id="file-chooser" />
+    <button id="upload-button">Upload to S3</button>
+</div>
+
+<div id="listing"></div>
 <div id="results"></div>
 
 <script type="text/javascript" src="https://sdk.amazonaws.com/js/aws-sdk-2.0.0-rc1.min.js"></script>

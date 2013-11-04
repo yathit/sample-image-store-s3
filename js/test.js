@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * @fileoverview Image upload app.
+ * @fileoverview Image upload app with AWS S3 backend.
  *
  * @author kyawtun@yathit.com (Kyaw Tun)
  */
@@ -25,20 +25,18 @@ var bucketName = 'ydn-db-sample-image-store-s3';
 
 
 AWS.config.region = 'ap-southeast-1';
+var bucket;
+var user_id;
 
-
-var fileChooser = document.getElementById('file-chooser');
-var button = document.getElementById('upload-button');
+var file_chooser = document.getElementById('file-chooser');
+var btn_upload = document.getElementById('upload-button');
 var results = document.getElementById('results');
-button.addEventListener('click', function() {
-  var file = fileChooser.files[0];
+var div_listing = document.getElementById('listing');
+btn_upload.addEventListener('click', function() {
+  var file = file_chooser.files[0];
   if (file) {
-    var user_id = document.getElementById('user-name').getAttribute('value');
-    var objKey = user_id + '/' + file.name;
-    results.innerHTML = 'uploadint to ' + objKey;
-    //Object key will be facebook-USERID#/FILE_NAME
-
-    var bucket = new AWS.S3({params: {Bucket: bucketName, region: 'ap-southeast-1'}});
+    var objKey = file.name;
+    results.innerHTML = 'uploading to ' + objKey;
     var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
     bucket.putObject(params, function(err, data) {
       if (err) {
@@ -55,9 +53,49 @@ button.addEventListener('click', function() {
   }
 }, false);
 
+var btn_list = document.getElementById('list');
+btn_list.onclick = function(e) {
+  bucket.listObjects({MaxKeys: 10}, function(err, data) {
+    if (err) {
+      throw err;
+    }
+    console.log(data);
+    var transform = {
+      feed: [
+        {
+          tag: 'div',
+          html: '${Name}'
+        },
+        {
+          tag: 'ul',
+          class: 'listing',
+          children: function() {
+            return (json2html.transform(this.Contents, transform.content))
+          }
+        }
+      ],
+      content: [
+        {
+          tag: 'li',
+          children: [
+            {
+              tag: 'img',
+              src: '//' + bucketName + '.s3.amazonaws.com/${Key}',
+              width: '100%',
+              style: 'max-width: 120px',
+              title: '${Key}'
+            }
+          ]}
+      ]
+    };
+    var html = json2html.transform(data, transform.feed);
+    console.log(html);
+    div_listing.innerHTML = html;
+  })
+};
 
 function runUploadApp(token) {
-  console.log(token);
+  // console.log(token);
   if (!token) {
     return;
   }
@@ -65,6 +103,8 @@ function runUploadApp(token) {
     RoleArn: 'arn:aws:iam::' + awsAccountId + ':role/' + roleArn,
     WebIdentityToken: token.id_token
   });
-  button.style.display = '';
+  user_id = document.getElementById('user-name').getAttribute('value');
+  document.getElementById('s3-toolbar').style.display = '';
+  bucket = new AWS.S3({params: {Bucket: bucketName, region: 'ap-southeast-1'}});
 }
 
