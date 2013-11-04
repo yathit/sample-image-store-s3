@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * @fileoverview Image upload app.
+ * @fileoverview Image upload app with AWS S3 backend.
  *
  * @author kyawtun@yathit.com (Kyaw Tun)
  */
