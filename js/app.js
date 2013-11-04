@@ -22,6 +22,37 @@
 var awsAccountId = '459880441775';
 var roleArn = 'test-gapi';
 var bucketName = 'ydn-db-sample-image-store-s3';
+var dbName = 'sample-image-store-s3';
+
+var schema = {
+  version: 1,
+  stores: [{
+    name: 'photo-meta',
+    keyPath: 'key',
+    indexes: [{
+      keyPath: 'modified'
+    }, {
+      keyPath: 'expires'
+    }],
+    Sync: {
+      format: 's3-meta',
+      Options: {
+        bucket: bucketName
+      }
+    }
+  }, {
+    name: 'photo',
+    fixed: true,
+    Sync: {
+      metaStoreName: 'photo-meta',
+      format: 's3',
+      Options: {
+        bucket: bucketName
+      }
+    }
+  }]
+};
+var db = new ydn.db.Storage(dbName, schema);
 
 
 AWS.config.region = 'ap-southeast-1';
@@ -55,43 +86,11 @@ btn_upload.addEventListener('click', function() {
 
 var btn_list = document.getElementById('list');
 btn_list.onclick = function(e) {
-  bucket.listObjects({MaxKeys: 10}, function(err, data) {
-    if (err) {
-      throw err;
-    }
-    console.log(data);
-    var transform = {
-      feed: [
-        {
-          tag: 'div',
-          html: '${Name}'
-        },
-        {
-          tag: 'ul',
-          'class': 'listing',
-          children: function() {
-            return (json2html.transform(this.Contents, transform.content))
-          }
-        }
-      ],
-      content: [
-        {
-          tag: 'li',
-          children: [
-          {
-            tag: 'img',
-            src: '//' + bucketName + '.s3.amazonaws.com/${Key}',
-            width: '100%',
-            style: 'max-width: 120px',
-            title: '${Key}'
-          }
-        ]}
-      ]
-    };
-    var html = json2html.transform(data, transform.feed);
-    console.log(html);
-    div_listing.innerHTML = html;
-  })
+  db.keys('photo').then(function(keys) {
+    console.log(keys);
+  }, function(err) {
+    throw err;
+  });
 };
 
 function runUploadApp(token) {
@@ -105,6 +104,5 @@ function runUploadApp(token) {
   });
   user_id = document.getElementById('user-name').getAttribute('value');
   document.getElementById('s3-toolbar').style.display = '';
-  bucket = new AWS.S3({params: {Bucket: bucketName, region: 'ap-southeast-1'}});
 }
 
