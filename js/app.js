@@ -25,15 +25,10 @@ var bucketName = 'ydn-db-sample-image-store-s3';
 var dbName = 'sample-image-store-s3';
 
 var schema = {
-  version: 1,
+  version: 2,
   stores: [{
     name: 'photo-meta',
-    keyPath: 'key',
-    indexes: [{
-      keyPath: 'modified'
-    }, {
-      keyPath: 'expires'
-    }],
+    keyPath: 'Key',
     Sync: {
       format: 's3-meta',
       Options: {
@@ -54,7 +49,6 @@ var schema = {
 };
 var db = new ydn.db.Storage(dbName, schema);
 
-
 AWS.config.region = 'ap-southeast-1';
 var bucket;
 var user_id;
@@ -69,15 +63,14 @@ btn_upload.addEventListener('click', function() {
     var objKey = file.name;
     results.innerHTML = 'uploading to ' + objKey;
     var params = {Key: objKey, ContentType: file.type, Body: file, ACL: 'public-read'};
-    bucket.putObject(params, function(err, data) {
-      if (err) {
-        console.log(err);
-        results.innerHTML = 'ERROR: ' + err;
-      } else {
-        var imageTag = "<img src='" + '//' + bucketName + '.s3.amazonaws.com/' +
-            objKey + "'></img><br/>";
-        results.innerHTML += imageTag;
-      }
+    var req = db.put('photo', file, objKey);
+    req.then(function(data) {
+      var imageTag = "<img src='" + '//' + bucketName + '.s3.amazonaws.com/' +
+          objKey + "'></img><br/>";
+      results.innerHTML += imageTag;
+    }, function(err) {
+      console.log(err);
+      results.innerHTML = 'ERROR: ' + err;
     });
   } else {
     results.innerHTML = 'Nothing to upload.';
@@ -86,8 +79,14 @@ btn_upload.addEventListener('click', function() {
 
 var btn_list = document.getElementById('list');
 btn_list.onclick = function(e) {
-  db.keys('photo').then(function(keys) {
+  db.values('photo-meta').then(function(keys) {
     console.log(keys);
+    var tx = [{
+      tag: 'li',
+      html: '${Key}'
+    }];
+    var html = json2html.transform(keys, tx);
+    div_listing.innerHTML = '<ul>' + html + '</ul>';
   }, function(err) {
     throw err;
   });
